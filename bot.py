@@ -29,7 +29,7 @@ def run_web_server():
         print(f"Web server running on port {PORT}")
         httpd.serve_forever()
 
-# Web sunucusunu arka planda (ayrı bir kolda) başlatıyoruz
+# Web sunucusunu arka planda başlatıyoruz
 threading.Thread(target=run_web_server, daemon=True).start()
 
 
