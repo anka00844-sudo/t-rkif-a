@@ -1,3 +1,7 @@
+import os
+import threading
+import http.server
+import socketserver
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -8,6 +12,26 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+
+# =========================================================
+# RENDER WEB SERVICE İÇİN MİNİ WEB SUNUCUSU (Sistemin kapanmaması için)
+# =========================================================
+PORT = int(os.environ.get("PORT", 10000))
+
+class HealthCheckHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"ANKA VIP Bot is live and running!")
+
+def run_web_server():
+    with socketserver.TCPServer(("", PORT), HealthCheckHandler) as httpd:
+        print(f"Web server running on port {PORT}")
+        httpd.serve_forever()
+
+# Web sunucusunu arka planda (ayrı bir kolda) başlatıyoruz
+threading.Thread(target=run_web_server, daemon=True).start()
+
 
 # =========================================================
 # AYARLAR
