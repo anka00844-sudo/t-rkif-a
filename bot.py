@@ -13,7 +13,7 @@ from telegram.ext import (
     filters,
 )
 
-# Render canlı kalma port ayarı (Web Service olarak ayakta kalması için)
+# Render canlı kalma port ayarı
 PORT = int(os.environ.get("PORT", 10000))
 
 class HealthCheckHandler(http.server.SimpleHTTPRequestHandler):
@@ -26,11 +26,11 @@ def run_web_server():
     with socketserver.TCPServer(("", PORT), HealthCheckHandler) as httpd:
         httpd.serve_forever()
 
-# Arka planda web sunucusunu başlat (Render kapanmasın diye)
+# Arka planda web sunucusunu başlat
 threading.Thread(target=run_web_server, daemon=True).start()
 
-# --- BOT BİLGİLERİ ---
-TOKEN = "8522565760:AAGHVItP1h7Wn_CS41IapWDIEVuDiNOQTNs"
+# --- YENİ BOT TOKEN BİLGİSİ ---
+TOKEN = "8522565760:AAGq0KNXfgncd6A5nW7CGImFFpy-gmMHXp8"
 IBAN = "TR06 0001 0021 5470 2002 4550 04"
 RECIPIENT = "Zeynep Alkoç"
 PRICE = "300 TL"
@@ -64,12 +64,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message:
         await update.message.reply_text(text, parse_mode="Markdown", reply_markup=main_menu())
     elif update.callback_query:
-        await update.callback_query.message.edit_text(text, parse_mode="Markdown", reply_markup=main_menu())
+        try:
+            await update.callback_query.message.edit_text(text, parse_mode="Markdown", reply_markup=main_menu())
+        except Exception:
+            pass
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
+    await query.answer()  # Butonun yükleniyor simgesini kapatır
     data = query.data
+
+    text = ""
+    keyboard = []
 
     if data == "buy_vip":
         text = (
@@ -85,7 +91,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "3️⃣ Sistem dekontu onayladığı an özel VIP davet linkleriniz saniyeler içinde otomatik gelecektir!"
         )
         keyboard = [[InlineKeyboardButton("⬅️ Ana Menüye Dön", callback_data="home")]]
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "how_to_buy":
         text = (
@@ -95,7 +100,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "3️⃣ Bot dekontu algılayıp VIP linkleri anında size versin!"
         )
         keyboard = [[InlineKeyboardButton("⬅️ Ana Menüye Dön", callback_data="home")]]
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "vip_features":
         text = (
@@ -105,7 +109,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "• 7/24 öncelikli destek hattı"
         )
         keyboard = [[InlineKeyboardButton("⬅️ Ana Menüye Dön", callback_data="home")]]
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "home":
         text = (
@@ -113,7 +116,21 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✨ Tamamen gizli ve özel içeriklerin paylaşıldığı VIP ekosistemimize anında adım atın.\n\n"
             "👇 Aşağıdaki menüden işlemlerinizi yönetebilirsiniz:"
         )
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=main_menu())
+        keyboard = [
+            [InlineKeyboardButton("💎 VIP Üyelik Satın Al (300 TL)", callback_data="buy_vip")],
+            [InlineKeyboardButton("📖 Nasıl Satın Alınır?", callback_data="how_to_buy")],
+            [InlineKeyboardButton("🛡️ VIP Özellikler", callback_data="vip_features")],
+            [InlineKeyboardButton("📞 7/24 Canlı Destek", url="https://t.me/SMSPATRONUM")],
+        ]
+
+    try:
+        await query.edit_message_text(
+            text, 
+            parse_mode="Markdown", 
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    except Exception as e:
+        logger.error(f"Buton menü değiştirme hatası: {e}")
 
 async def receipt_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.photo or update.message.document:
@@ -137,7 +154,7 @@ def main():
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.PHOTO | filters.Document.ALL, receipt_handler))
     
-    logger.info("Bot Polling modu ile başlatılıyor...")
+    logger.info("Bot Yeni Token ile Polling modunda başlatılıyor...")
     app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
