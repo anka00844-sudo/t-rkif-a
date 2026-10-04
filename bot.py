@@ -29,7 +29,7 @@ def run_web_server():
 # Arka planda web sunucusunu başlat
 threading.Thread(target=run_web_server, daemon=True).start()
 
-# --- YENİ BOT TOKEN BİLGİSİ ---
+# --- BOT TOKEN BİLGİSİ ---
 TOKEN = "8522565760:AAGq0KNXfgncd6A5nW7CGImFFpy-gmMHXp8"
 IBAN = "TR06 0001 0021 5470 2002 4550 04"
 RECIPIENT = "Zeynep Alkoç"
@@ -71,7 +71,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()  # Butonun yükleniyor simgesini kapatır
+    await query.answer()
     data = query.data
 
     text = ""
@@ -103,7 +103,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "vip_features":
         text = (
-            "🛡️ *VIP AYRICALIKLARI*\n\n"
+            "🛡️️ *VIP AYRICALIKLARI*\n\n"
             "• Sınırsız ve ömür boyu kanal erişimi\n"
             "• Günlük güncellenen özel arşivler\n"
             "• 7/24 öncelikli destek hattı"
